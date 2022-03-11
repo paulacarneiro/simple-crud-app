@@ -1,24 +1,37 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import UserTable from './tables/UserTable';
 import AddUserForm from './forms/AddUserForm';
 
 const App = () => {
-  const usersData = [
-    { id: 1, name: 'Bailey Young', email: 'byoung@yahoo.com' },
-    { id: 2, name: 'Jack Fischer', email: 'fischer35@gmail.com' }
-  ];
+  // const usersData = [
+  //   { id: 1, name: 'Bailey Young', email: 'byoung@yahoo.com' },
+  //   { id: 2, name: 'Jack Fischer', email: 'fischer35@gmail.com' }
+  // ];
+  const usersData = [];
   const initialFormState = { id: null, name: '', email: '' };
 
-  const [users, setUsers] = useState(usersData);
+  const [users, setUsers] = useState(() => {
+    const localUsers = JSON.parse(localStorage.getItem('users'));
+    if (localUsers) {
+      return localUsers.length ? localUsers : usersData;              // avoid error of trying to get length of null
+    }
+    return usersData;
+  });
+
   const [editing, setEditing] = useState(false);
   const [currentUser, setCurrentUser] = useState(initialFormState);
+
+  useEffect(() => {
+    localStorage.setItem('users', JSON.stringify(users));
+  }, [users]);
 
   const addUser = (user) => {
     if (editing) {
       updateUser(user.id, user);
       return;
-    } 
-    user.id = users.slice(-1)[0].id + 1;
+    }
+    
+    user.id = users.length ? users.slice(-1)[0].id + 1 : 1;    // sets new user id to last user's id + 1. if there are no users, sets the id to 1
     setUsers([...users, user]);
   }
 
